@@ -2,7 +2,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { loginUser } from "../api/api.js";
 import { useNavigate } from "react-router-dom";
-
+import { showSuccess, showError } from "../utils/toast.js";
+import { Link } from "react-router-dom";
 function LoginForm() {
   const {
     register,
@@ -15,13 +16,14 @@ function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
   const onSubmit = async (data) => {
-    console.log(data);
     try {
       const response = await loginUser(data);
       if (!response.success) {
-        alert(response.message);
+        showError(response.message);
       }
+      showSuccess(response.message);
       localStorage.setItem("token", response.token);
       localStorage.setItem(
         "user",
@@ -37,9 +39,7 @@ function LoginForm() {
         navigate("/admin");
       } else if (response.role === "employee") {
         navigate("/employee");
-      } 
-
-      else if (
+      } else if (
         [
           "IT_dept_Agent",
           "HR_dept_Agent",
@@ -48,14 +48,12 @@ function LoginForm() {
         ].includes(response.role)
       ) {
         navigate("/agent");
+      } else {
+        navigate("/register");
       }
-      else{
-           navigate("/register");
-      }
-      // alert(response.message);
     } catch (err) {
       console.log(err);
-      // alert("Registration failed");
+      showError(err?.response?.data?.message );
     }
   };
 
@@ -177,13 +175,13 @@ function LoginForm() {
                 <div className="text-center mt-4">
                   <small className="text-muted">
                     Don't have an account?
-                    <a
-                      href="/register"
+                    <Link
+                      to="/register"
                       className="fw-semibold text-decoration-none ms-1"
                       style={{ color: "#F59E0B" }}
                     >
                       Create Account
-                    </a>
+                    </Link>
                   </small>
                 </div>
               </form>

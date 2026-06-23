@@ -24,12 +24,13 @@ export const fetchAllUser = async () => {
   return response.data;
 };
 
-export const updateRole = async (id, role) => {
-  await api.patch(`/auth/users/${id}/role`, { role });
-};
+export const updateUser = async (id, role, status) => {
+  const res = await api.patch(`/auth/users/${id}`, {
+    role,
+    status,
+  });
 
-export const updateStatus = async (id, status) => {
-  await api.patch(`/auth/users/${id}/status`, { status });
+  return res.data;
 };
 
 export const createTicket = async (ticketData) => {
@@ -44,7 +45,6 @@ export const createTicket = async (ticketData) => {
   return response.data;
 };
 
-
 export const fetchTicket = async () => {
   const token = localStorage.getItem("token");
 
@@ -57,9 +57,7 @@ export const fetchTicket = async () => {
   return response.data;
 };
 
-
-
-export const updateTicket = async (id,ticketData) => {
+export const updateTicket = async (id, ticketData) => {
   const token = localStorage.getItem("token");
 
   const response = await api.put(`/tickets/update/${id}`, ticketData, {
@@ -69,4 +67,57 @@ export const updateTicket = async (id,ticketData) => {
   });
 
   return response.data;
+};
+
+export const DeleteTicket = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await api.delete(`/tickets/delete/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export const updateTicketStatus = async (id, status, confirm_status) => {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    status,
+  };
+
+  if (confirm_status) {
+    payload.confirm_status = confirm_status;
+  }
+
+  const response = await api.patch(`/tickets/ticketStatus/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export const detectTicket = async (description) => {
+  const token = localStorage.getItem("token");
+
+  const response = await api.post(
+    "/ai/categorize",
+    { description },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return response.data;
+};
+
+export const getSuggestedResponse = async (description) => {
+  const res = await api.post("/ai/suggest-response", { description });
+  return res.data;
 };

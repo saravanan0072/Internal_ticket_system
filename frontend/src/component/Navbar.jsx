@@ -1,5 +1,15 @@
+import { useNavigate } from "react-router-dom";
+
 function Navbar() {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
 
   return (
     <nav
@@ -7,13 +17,21 @@ function Navbar() {
       style={{ height: "70px" }}
     >
       <div className="container-fluid">
-        <h5 className="mb-0 fw-semibold">Admin Dashboard</h5>
+        <h5 className="mb-0 fw-semibold">
+          {user?.role} Dashboard
+        </h5>
 
         <div className="d-flex align-items-center gap-3">
           <div className="text-end">
-            <div className="fw-semibold">{user?.userName}</div>
+            <div className="fw-semibold">
+              {user?.userName}
+            </div>
 
-            <small className="text-muted">Administrator</small>
+            {user?.role === "admin" && (
+              <small className="text-muted">
+                Administrator
+              </small>
+            )}
           </div>
 
           <div
@@ -25,6 +43,14 @@ function Navbar() {
           >
             <i className="bi bi-person-fill"></i>
           </div>
+
+          <button
+            className="btn btn-outline-danger btn-sm"
+            onClick={handleLogout}
+          >
+            <i className="bi bi-box-arrow-right me-1"></i>
+            Logout
+          </button>
         </div>
       </div>
     </nav>

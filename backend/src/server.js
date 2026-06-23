@@ -1,6 +1,7 @@
 import express from 'express'
 import authRoutes from './Routes/authRoutes.js'
 import ticketRoutes from './Routes/ticketRoutes.js';
+import aiRoutes from "./routes/aiRoutes.js";
 import {createTables} from './config/model/createTables.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
@@ -12,6 +13,8 @@ app.use(cors())
 app.use(express.json())
 app.use("/api/auth",authRoutes)
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/ai", aiRoutes);
+
 const serverStart = async()=>{
     try{
         await createTables()

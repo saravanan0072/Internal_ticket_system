@@ -1,8 +1,9 @@
-import { fetchAllUser, updateRole, updateStatus } from "../api/api.js";
+import { fetchAllUser,updateUser } from "../api/api.js";
 import { useEffect, useState } from "react";
-
+import { showSuccess, showError } from "../utils/toast";
 function ManageUsers() {
   const [users, setUsers] = useState([]);
+  const [loadingId, setLoadingId] = useState(null);
   const getUsers = async () => {
     try {
       const res = await fetchAllUser();
@@ -29,20 +30,26 @@ function ManageUsers() {
     );
   };
 
-  const updateUser = async (user) => {
+  const updateUserData = async (user) => {
     try {
-      await updateRole(user.id, user.role);
+      setLoadingId(user.id);
+      const res = await updateUser(user.id, user.role, user.status);
 
-      await updateStatus(user.id, user.status);
-      
+      if (!res.success) {
+        showError(res.message);
+        return;
+      }
+
+      showSuccess(res.message);
+
       await getUsers();
-      // alert(
-      //   "User updated successfully"
-      // );
     } catch (err) {
       console.log(err);
+      showError(err?.response?.data?.message);
 
-    await getUsers();
+      await getUsers();
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -119,9 +126,10 @@ function ManageUsers() {
                     <td>
                       <button
                         className="btn btn-warning btn-sm"
-                        onClick={() => updateUser(user)}
+                        disabled={loadingId === user.id}
+                        onClick={() => updateUserData(user)}
                       >
-                        Update
+                        {loadingId === user.id ? "Updating..." : "Update"}
                       </button>
                     </td>
                   </tr>

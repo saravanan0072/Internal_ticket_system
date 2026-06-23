@@ -30,15 +30,23 @@ export const Register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const [users] = await db.query(`select * from userDetails where email=?`, [ email]);
+    const [users] = await db.query(`select * from userDetails where email=?`, [
+      email,
+    ]);
     if (users.length === 0) {
-      return res.json({ message: "user not found" });
+      return res.json({
+        success: false,
+        message: "User not found",
+      });
     }
     const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.json({ message: "invalidCrediantial" });
+      return res.json({
+        success: false,
+        message: "Invalid credentials",
+      });
     }
     if (user.status === "inActive") {
       return res.json({
@@ -67,12 +75,17 @@ export const login = async (req, res) => {
   }
 };
 
-export const updateRole = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { role } = req.body;
 
-    const [user] = await db.query(`SELECT * FROM userDetails WHERE id=?`, [id]);
+    const { role, status } = req.body;
+
+    const [user] = await db.query(
+      `SELECT * FROM userDetails
+       WHERE id=?`,
+      [id],
+    );
 
     if (user.length === 0) {
       return res.status(404).json({
@@ -84,16 +97,17 @@ export const updateRole = async (req, res) => {
     const singleAgentRoles = [
       "IT_dept_Agent",
       "HR_dept_Agent",
-      "Admin_dept_agent",
+      "Admin_dept_Agent",
       "Finance_dept_agent",
     ];
 
-    if (singleAgentRoles.includes(role)) {
+    if (role !== user[0].role && singleAgentRoles.includes(role)) {
       const [existingAgent] = await db.query(
         `SELECT id
-         FROM userDetails
-         WHERE role=?`,
-        [role],
+           FROM userDetails
+           WHERE role=?
+           AND id != ?`,
+        [role, id],
       );
 
       if (existingAgent.length > 0) {
@@ -106,14 +120,15 @@ export const updateRole = async (req, res) => {
 
     await db.query(
       `UPDATE userDetails
-       SET role=?
+       SET role=?,
+           status=?
        WHERE id=?`,
-      [role, id],
+      [role, status, id],
     );
 
     res.status(200).json({
       success: true,
-      message: "Role updated successfully",
+      message: "User updated successfully",
     });
   } catch (err) {
     res.status(500).json({
@@ -122,42 +137,6 @@ export const updateRole = async (req, res) => {
     });
   }
 };
-
-export const updateStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const [user] = await db.query(`SELECT id FROM userDetails WHERE id=?`, [
-      id,
-    ]);
-
-    if (user.length === 0) {
-      return res.json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    await db.query(
-      `UPDATE userDetails
-       SET status=?
-       WHERE id=?`,
-      [status, id],
-    );
-
-    res.json({
-      success: true,
-      message: "Status updated successfully",
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      error: err.message,
-    });
-  }
-};
-
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -169,7 +148,7 @@ export const getAllUsers = async (req, res) => {
         role,
         status
        FROM userDetails
-       ORDER BY id ASC`
+       ORDER BY id ASC`,
     );
 
     res.json({

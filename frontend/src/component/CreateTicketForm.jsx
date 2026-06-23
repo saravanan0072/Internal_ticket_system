@@ -1,19 +1,33 @@
 import { useForm } from "react-hook-form";
-import { createTicket, fetchTicket, updateTicket } from "../api/api.js";
+import {
+  createTicket,
+  fetchTicket,
+  updateTicket,
+  detectTicket,
+} from "../api/api.js";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import{showError,showWarning,showSuccess, showInfo} from '../utils/toast.js'
+
 
 function CreateTicketForm() {
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
+
     formState: { errors },
   } = useForm({
     mode: "onBlur",
   });
   const { ticketId } = useParams();
   const [tickets, setTickets] = useState([]);
+  const navigate = useNavigate();
+  const [loadingAI, setLoadingAI] = useState(false);
+
   const getTickets = async () => {
     try {
       const res = await fetchTicket();
@@ -22,7 +36,8 @@ function CreateTicketForm() {
       console.log(err);
     }
   };
-  const editForm = tickets.find((ticket) => ticket.id === Number(ticketId));
+  const editForm = tickets?.find((ticket) => ticket.id === Number(ticketId));
+
   useEffect(() => {
     if (!editForm) return;
 
@@ -33,7 +48,7 @@ function CreateTicketForm() {
       urgency_level: editForm.urgency_level,
     });
   }, [editForm, reset]);
-  
+
   useEffect(() => {
     getTickets();
   }, []);
@@ -43,14 +58,39 @@ function CreateTicketForm() {
     try {
       if (ticketId) {
         await updateTicket(ticketId, data);
+        navigate("/employee");
       } else {
         const res = await createTicket(data);
+        reset();
+        navigate("/employee");
       }
     } catch (err) {
       console.log(err);
     }
+  };
 
-    reset();
+  const handleAIDetect = async () => {
+    try {
+      setLoadingAI(true);
+
+      const description = getValues("description");
+
+      if (!description) {
+        showWarning("Please enter description first");
+        return;
+      }
+
+      const res = await detectTicket(description);
+
+      setValue("department", res.department);
+      setValue("urgency_level", res.urgency);
+
+    } catch (err) {
+      console.log(err);
+      showError("AI service unavailable. Please select manually.");
+    } finally {
+      setLoadingAI(false);
+    }
   };
 
   return (
@@ -105,7 +145,16 @@ function CreateTicketForm() {
                   required: "Description is required",
                 })}
               ></textarea>
-
+              <div className="mt-2">
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={handleAIDetect}
+                  disabled={loadingAI}
+                >
+                  {loadingAI ? "Detecting..." : "Auto Detect Using AI"}
+                </button>
+              </div>
               <div className="invalid-feedback">
                 {errors.description?.message}
               </div>

@@ -44,7 +44,7 @@ export const createTables = async () => {
       department enum('IT_Dept','HR_Dept','admin_Dept','Finance_Dept') not null,
       urgency_level enum('Low','Medium','High') default 'Low',
       status enum('Open','InProgress','Resolved','Closed','WaitingApproval','ReOpen') default 'Open',
-      confirm_status enum('Fixed','Not_Fixed') default 'Not_Fixed',
+      confirm_status enum('todo','pending','Fixed','Not_Fixed') default 'todo',
       employee_id int not null,
       foreign key(employee_id) references userDetails(id) on delete cascade,
       created_at timestamp default current_timestamp,

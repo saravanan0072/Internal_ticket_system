@@ -31,17 +31,9 @@ function Sidebar() {
           Manage Tickets
         </NavLink>
 
-        <NavLink to="/admin/analytics" className="nav-link text-white mb-2">
-          <i className="bi bi-bar-chart me-2"></i>
-          Analytics
-        </NavLink>
-
         <hr />
 
-        <button className="btn btn-outline-light w-100">
-          <i className="bi bi-box-arrow-right me-2"></i>
-          Logout
-        </button>
+        
       </div>
     </div>
   );

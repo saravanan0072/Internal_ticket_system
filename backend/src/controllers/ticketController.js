@@ -47,11 +47,14 @@ export const updateTickets = async (req, res) => {
       return res.json({ message: "only employees can update tickets" });
     }
 
-    await db.query(`update ticketDetails set title=?,description=?,department=?,urgency_level=? where id=?
-        [title,description,department,urgency_level,id]`);
+    await db.query(
+      `update ticketDetails set title=?,description=?,department=?,urgency_level=? where id=?
+       `,
+      [title, description, department, urgency_level, id],
+    );
     res.status(200).json({ message: "tickes update sucessfully", id: id });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err });
   }
 };
 
@@ -74,7 +77,11 @@ export const deleteTickets = async (req, res) => {
 export const updateTicketStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, confirm_status } = req.body;
+    let { status, confirm_status } = req.body;
+    if (status === "Resolved") {
+      confirm_status = "pending";
+    }
+    
     if (confirm_status) {
       await db.query(
         `UPDATE ticketDetails
