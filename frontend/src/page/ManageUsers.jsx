@@ -79,7 +79,7 @@ function ManageUsers() {
                 {users.map((user) => (
                   <tr key={user.id}>
                     <td>{user.id}</td>
-                    <td>{user.UserName}</td>
+                    <td>{user.userName}</td>
                     <td>{user.email}</td>
                     <td>
                       <span className="badge bg-secondary">{user.role}</span>

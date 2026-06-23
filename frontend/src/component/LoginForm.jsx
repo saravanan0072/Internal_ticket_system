@@ -20,9 +20,13 @@ function LoginForm() {
   const onSubmit = async (data) => {
     try {
       const response = await loginUser(data);
+      console.log(response);
       if (!response.success) {
         showError(response.message);
+        return;
       }
+      console.log("Response:", response);
+      console.log("Role:", response.role);
       showSuccess(response.message);
       localStorage.setItem("token", response.token);
       localStorage.setItem(
@@ -53,7 +57,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.log(err);
-      showError(err?.response?.data?.message );
+      showError(err?.response?.data?.message);
     }
   };
 

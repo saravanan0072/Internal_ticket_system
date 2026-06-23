@@ -63,6 +63,7 @@ export const login = async (req, res) => {
       { expiresIn: "1d" },
     );
     res.status(200).json({
+      success: true,
       id: user.id,
       userName: user.userName,
       email: user.email,
